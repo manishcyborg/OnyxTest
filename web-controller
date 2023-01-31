@@ -1,0 +1,61 @@
+Create a website with a Web API controller that uses the VatVerifier class, and a simple front-end using Angular, React or any other frontend framework. Implement a VAT validation form that uses the controller to verify a given VAT number for a given country.
+
+
+[Route("api/[controller]")]
+[ApiController]
+public class VatVerifierController : ControllerBase
+{
+    [HttpGet("verify")]
+    public async Task<ActionResult<VatVerificationResult>> VerifyVat(string countryCode, string vatNumber)
+    {
+        var result = await VatVerifier.Verify(countryCode, vatNumber);
+
+        return Ok(new VatVerificationResult { Status = result });
+    }
+}
+
+public class VatVerificationResult
+{
+    public VatVerifier.VerificationStatus Status { get; set; }
+}
+
+
+
+
+
+import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-vat-verification-form',
+  template: `
+    <form [formGroup]="vatForm">
+      <div>
+        <label for="countryCode">Country Code:</label>
+        <input type="text" id="countryCode" formControlName="countryCode">
+        <div *ngIf="vatForm.get('countryCode').touched && vatForm.get('countryCode').hasError('required')">
+          Country code is required
+        </div>
+      </div>
+      <div>
+        <label for="vatNumber">VAT Number:</label>
+        <input type="text" id="vatNumber" formControlName="vatNumber">
+        <div *ngIf="vatForm.get('vatNumber').touched && vatForm.get('vatNumber').hasError('required')">
+          VAT number is required
+        </div>
+      </div>
+      <button type="submit" [disabled]="vatForm.invalid">Verify</button>
+    </form>
+  `
+})
+export class VatVerificationFormComponent implements OnInit {
+  vatForm = new FormGroup({
+    countryCode: new FormControl('', Validators.required),
+    vatNumber: new FormControl('', Validators.required)
+  });
+
+  ngOnInit(): void {
+  }
+
+  // TODO: Implement method to send VAT verification request
+}
